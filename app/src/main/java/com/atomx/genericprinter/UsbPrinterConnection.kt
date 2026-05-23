@@ -60,7 +60,7 @@ class UsbPrinterConnection(
             if (endpointOut != null) break
         }
 
-        // 4. Validate endpoint
+        // 4. Validate endpoint and validate endpoint
         if (intf == null || endpointOut == null) {
             PrinterLogger.e("No BULK OUT endpoint found. This USB device is not an ESC/POS printer.")
             close()
