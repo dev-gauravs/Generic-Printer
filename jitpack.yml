@@ -1,8 +1,2 @@
 jdk:
   - openjdk17
-
-build:
-  gradle:
-    tasks:
-      - :genericprinter:clean
-      - :genericprinter:publishToMavenLocal

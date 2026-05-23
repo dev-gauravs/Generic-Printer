@@ -22,9 +22,5 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "GenericPrinter"
-
 include(":genericprinter")
-
-if (System.getenv("JITPACK") == null) {
-    include(":app")
-}
+project(":genericprinter").projectDir = file("app")
