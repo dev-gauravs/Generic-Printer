@@ -29,7 +29,7 @@ class BluetoothPrinterConnection(
             return false
         }
 
-        // Try insecure -> secure -> reflection fallback
+        // Try insecure -> secure -> reflection fallback and test
         val s1 = tryCreateAndConnect(device, insecure = true)
         if (s1) return true
 
