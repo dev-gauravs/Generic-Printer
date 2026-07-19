@@ -21,7 +21,7 @@ Add the library dependency:
 
 ```gradle
 dependencies {
-    implementation "com.github.dev-gauravs:Generic-Printer:1.1.4"
+    implementation "com.github.dev-gauravs:Generic-Printer:1.1.5"
 }
 ```
 
@@ -201,7 +201,7 @@ Publish to your local Maven repository:
 
 1. Update `VERSION_NAME` in `gradle.properties`.
 2. Commit the change.
-3. Create and push a Git tag that matches the version, for example `1.1.4`.
+3. Create and push a Git tag that matches the version, for example `1.1.5`.
 4. Open `https://jitpack.io/#dev-gauravs/Generic-Printer`.
 5. Ask consumers to use the same version in Gradle.
 

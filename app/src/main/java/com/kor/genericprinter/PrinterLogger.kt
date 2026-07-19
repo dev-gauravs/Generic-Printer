@@ -1,10 +1,9 @@
 package com.kor.genericprinter
 
-
 import android.util.Log
 
 internal object PrinterLogger {
-    private const val TAG = "AtomXPrinter"
+    private const val TAG = "KorPrinter"
 
     var enabled: Boolean = false
 
