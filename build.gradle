@@ -5,7 +5,7 @@ plugins {
 }
 
 allprojects {
-    group = findProperty("GROUP") ?: "com.github.KundalikSuryawanshi"
+    group = findProperty("GROUP") ?: "com.github.dev-gauravs"
     version = findProperty("VERSION_NAME") ?: "1.0.7"
 }
 

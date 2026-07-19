@@ -63,7 +63,7 @@ afterEvaluate {
                             "POM_DESCRIPTION",
                             "Lightweight ESC/POS Bluetooth and USB thermal printer SDK for Android."
                     )
-                    url = pomProperty("POM_URL", "https://github.com/KundalikSuryawanshi/Generic-Printer")
+                    url = pomProperty("POM_URL", "https://github.com/dev-gauravs/Generic-Printer")
 
                     licenses {
                         license {
@@ -81,14 +81,14 @@ afterEvaluate {
                     }
 
                     scm {
-                        url = pomProperty("POM_SCM_URL", "https://github.com/KundalikSuryawanshi/Generic-Printer")
+                        url = pomProperty("POM_SCM_URL", "https://github.com/dev-gauravs/Generic-Printer")
                         connection = pomProperty(
                                 "POM_SCM_CONNECTION",
-                                "scm:git:git://github.com/KundalikSuryawanshi/Generic-Printer.git"
+                                "scm:git:git://github.com/dev-gauravs/Generic-Printer.git"
                         )
                         developerConnection = pomProperty(
                                 "POM_SCM_DEV_CONNECTION",
-                                "scm:git:ssh://github.com/KundalikSuryawanshi/Generic-Printer.git"
+                                "scm:git:ssh://github.com/dev-gauravs/Generic-Printer.git"
                         )
                     }
                 }
