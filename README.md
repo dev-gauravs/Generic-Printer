@@ -39,7 +39,7 @@ The library manifest declares Bluetooth and USB host capabilities. Your app shou
 Create one controller in your `Activity` and close it from `onDestroy`.
 
 ```kotlin
-class MainActivity : AppCompatActivity(), PrinterUiCallback {
+class MainActivity : Activity(), PrinterUiCallback {
 
     private lateinit var printer: PrinterUiController
 
