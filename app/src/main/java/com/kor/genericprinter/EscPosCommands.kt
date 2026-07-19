@@ -1,4 +1,4 @@
-package com.atomx.genericprinter
+package com.kor.genericprinter
 
 object EscPosCommands {
     val INIT = byteArrayOf(0x1B, 0x40)                 // ESC @

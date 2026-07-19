@@ -1,4 +1,4 @@
-package com.atomx.genericprinter
+package com.kor.genericprinter
 
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter

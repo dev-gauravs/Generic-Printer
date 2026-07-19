@@ -1,4 +1,4 @@
-package com.atomx.genericprinter.utils
+package com.kor.genericprinter.utils
 
 import android.content.Context
 import android.graphics.Bitmap

@@ -1,4 +1,4 @@
-package com.atomx.genericprinter
+package com.kor.genericprinter
 
 import android.graphics.Bitmap
 import kotlin.math.roundToInt

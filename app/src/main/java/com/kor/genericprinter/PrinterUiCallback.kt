@@ -1,4 +1,4 @@
-package com.atomx.genericprinter
+package com.kor.genericprinter
 
 interface PrinterUiCallback {
     fun onPrinterConnected(

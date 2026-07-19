@@ -10,7 +10,7 @@ def pomProperty = { String propertyName, String fallback ->
 }
 
 android {
-    namespace "com.atomx.genericprinter"
+    namespace "com.kor.genericprinter"
     compileSdk 35
 
     defaultConfig {

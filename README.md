@@ -21,7 +21,7 @@ Add the library dependency:
 
 ```gradle
 dependencies {
-    implementation "com.github.dev-gauravs:Generic-Printer:1.1.3"
+    implementation "com.github.dev-gauravs:Generic-Printer:1.1.4"
 }
 ```
 
@@ -174,7 +174,7 @@ printer.connectedClient()?.printReceipt {
 ## Images
 
 ```kotlin
-import com.atomx.genericprinter.utils.PrinterImageLoader
+import com.kor.genericprinter.utils.PrinterImageLoader
 
 val bitmap = PrinterImageLoader.fromDrawable(context, R.drawable.receipt_logo)
 
@@ -201,7 +201,7 @@ Publish to your local Maven repository:
 
 1. Update `VERSION_NAME` in `gradle.properties`.
 2. Commit the change.
-3. Create and push a Git tag that matches the version, for example `1.1.3`.
+3. Create and push a Git tag that matches the version, for example `1.1.4`.
 4. Open `https://jitpack.io/#dev-gauravs/Generic-Printer`.
 5. Ask consumers to use the same version in Gradle.
 

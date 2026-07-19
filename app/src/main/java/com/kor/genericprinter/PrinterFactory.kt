@@ -1,4 +1,4 @@
-package com.atomx.genericprinter
+package com.kor.genericprinter
 
 import android.bluetooth.BluetoothAdapter
 import android.hardware.usb.UsbDevice

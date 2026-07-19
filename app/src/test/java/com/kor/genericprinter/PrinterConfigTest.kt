@@ -1,4 +1,4 @@
-package com.atomx.genericprinter
+package com.kor.genericprinter
 
 import org.junit.Assert.assertThrows
 import org.junit.Test

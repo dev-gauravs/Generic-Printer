@@ -1,4 +1,4 @@
-package com.atomx.genericprinter
+package com.kor.genericprinter
 
 import android.hardware.usb.UsbConstants
 import android.hardware.usb.UsbDevice
