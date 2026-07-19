@@ -4,6 +4,11 @@ plugins {
     id "maven-publish"
 }
 
+def pomProperty = { String propertyName, String fallback ->
+    def value = findProperty(propertyName)
+    value == null ? fallback : value.toString()
+}
+
 android {
     namespace "com.atomx.genericprinter"
     compileSdk 35
@@ -28,10 +33,19 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
+
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+            withJavadocJar()
+        }
+    }
 }
 
 dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3"
+
+    testImplementation libs.junit
 }
 
 afterEvaluate {
@@ -39,9 +53,45 @@ afterEvaluate {
         publications {
             release(MavenPublication) {
                 from components.release
-                groupId = "com.github.KundalikSuryawanshi"
-                artifactId = "Generic-Printer"
-                version = project.version
+                groupId = project.group.toString()
+                artifactId = pomProperty("POM_ARTIFACT_ID", "Generic-Printer")
+                version = project.version.toString()
+
+                pom {
+                    name = pomProperty("POM_NAME", "GenericPrinter")
+                    description = pomProperty(
+                            "POM_DESCRIPTION",
+                            "Lightweight ESC/POS Bluetooth and USB thermal printer SDK for Android."
+                    )
+                    url = pomProperty("POM_URL", "https://github.com/KundalikSuryawanshi/Generic-Printer")
+
+                    licenses {
+                        license {
+                            name = pomProperty("POM_LICENSE_NAME", "MIT License")
+                            url = pomProperty("POM_LICENSE_URL", "https://opensource.org/licenses/MIT")
+                        }
+                    }
+
+                    developers {
+                        developer {
+                            id = pomProperty("POM_DEVELOPER_ID", "KundalikSuryawanshi")
+                            name = pomProperty("POM_DEVELOPER_NAME", "Kundalik Suryawanshi")
+                            email = pomProperty("POM_DEVELOPER_EMAIL", "gauravs7741@gmail.com")
+                        }
+                    }
+
+                    scm {
+                        url = pomProperty("POM_SCM_URL", "https://github.com/KundalikSuryawanshi/Generic-Printer")
+                        connection = pomProperty(
+                                "POM_SCM_CONNECTION",
+                                "scm:git:git://github.com/KundalikSuryawanshi/Generic-Printer.git"
+                        )
+                        developerConnection = pomProperty(
+                                "POM_SCM_DEV_CONNECTION",
+                                "scm:git:ssh://github.com/KundalikSuryawanshi/Generic-Printer.git"
+                        )
+                    }
+                }
             }
         }
     }

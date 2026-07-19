@@ -1,102 +1,210 @@
-# Generic-Printer 🖨️
-## Bluetooth Thermal Printer Library for Android
-
-Welcome to the Generic-Printer project, an open-source Android library dedicated to facilitating seamless printing experiences on Bluetooth thermal printers (2-3 inch). This library specializes in printing images (JPG, PNG, Bitmap) for POS and ESC machines, simplifying the printing process for businesses globally.
-Objective
-
-The primary goal of this project is to develop a high-performance Bluetooth thermal printer library for Android, focusing on efficient Bluetooth communication, image formatting, and smooth printer integration.
-### Features
-
-- Print various image formats (JPG, PNG, Bitmap) on 2/3 inch Bluetooth thermal printers.
-- Streamline printing processes for POS and ESC machines.
-- Easy integration and usage within Android applications.
-
-### Contributing
-
 # GenericPrinter
 
-Lightweight ESC/POS Bluetooth printer library for Android.
+Lightweight ESC/POS thermal printer SDK for Android. It supports Bluetooth SPP printers, USB ESC/POS printers, built-in connection dialogs, USB attach/detach handling, text, bitmap printing, batched receipts, line feeds, cutter commands, alignment commands, and raw ESC/POS bytes.
 
 ## Installation
+
+Add JitPack to the consuming app:
+
 ```gradle
-repositories {
-    maven { url 'https://jitpack.io' }
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven { url "https://jitpack.io" }
+    }
 }
+```
 
+Add the library dependency:
+
+```gradle
 dependencies {
-    implementation "com.github.KundalikSuryawanshi:GenericPrinter:v1.0.0"
+    implementation "com.github.KundalikSuryawanshi:Generic-Printer:1.1.2"
 }
-
-
-Contributions from developers are highly encouraged and welcomed! If you're interested in contributing, here's how you can get started:
-
-```
-Fork the Repository
-Fork the Generic-Printer repository to your GitHub account.
-
-Clone the Repository
-Clone the forked repository to your local development environment:
-
-bash
-git clone https://github.com/KundalikSuryawanshi/Generic-Printer`
-
 ```
 
-Create a Branch
+## Permissions
 
-> Create a new branch for your contributions:
-```
-git checkout -b feature/new-feature
+The library manifest declares Bluetooth and USB host capabilities. Your app should also request Bluetooth permission on Android 12+ before Bluetooth printing, or forward the permission result to `PrinterUiController`.
 
-```
-
-Make Changes
-
-> Implement your changes, enhancements, or bug fixes within this branch.
-> Commit Changes
-> Commit your changes with descriptive commit messages:
-
-```
-git commit -m "Add feature: Description of your changes"
-
+```xml
+<uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+<uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
 ```
 
-Push Changes
+## Ready-To-Use UI Flow
 
-> Push your changes to your forked repository:
+Create one controller in your `Activity` and close it from `onDestroy`.
+
+```kotlin
+class MainActivity : AppCompatActivity(), PrinterUiCallback {
+
+    private lateinit var printer: PrinterUiController
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        printer = PrinterUiController(
+            activity = this,
+            config = PrinterConfig(
+                paperWidthPx = 384,
+                debug = true
+            ),
+            callback = this
+        )
+
+        printer.startUsbAttachDetachFlow()
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        if (!printer.handleRequestPermissionsResult(requestCode, permissions, grantResults)) {
+            super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        }
+    }
+
+    override fun onDestroy() {
+        printer.close()
+        super.onDestroy()
+    }
+}
 ```
-git push origin feature/new-feature
 
+### Bluetooth Bitmap Print
+
+The controller displays paired Bluetooth devices. After the user selects one, the SDK connects and sends the bitmap.
+
+```kotlin
+val bitmap = PrinterImageLoader.fromDrawable(this, R.drawable.receipt_logo)
+printer.printBluetoothBitmap(bitmap)
 ```
-Open a Pull Request
-> Open a Pull Request (PR) from your forked repository to the main Generic-Printer repository.
-> Provide a clear and concise description of your changes in the PR.
 
-Developer's Guide for Merging Pull Requests
+If you already know the printer MAC address:
 
-- Review Pull Requests
--- As a maintainer, regularly review incoming Pull Requests.
--- Check the changes, code quality, and ensure they align with project goals.
+```kotlin
+printer.printBluetoothBitmap(
+    bitmap = bitmap,
+    macAddress = "00:11:22:33:44:55"
+)
+```
 
-- Discuss and Collaborate
--- Engage in discussions with contributors to address queries or suggestions related to the PR.
+### USB Printer Flow
 
-- Testing
--- Test the proposed changes locally or using CI/CD pipelines to verify functionality and compatibility.
+Start USB monitoring once:
 
-- Merge Pull Requests
--- Once satisfied with the changes, merge the approved Pull Request into the main branch.
--- Squash and merge or rebase commits if necessary to maintain a clean commit history.
+```kotlin
+printer.startUsbAttachDetachFlow()
+```
 
-- Update Documentation
--- Update the README or relevant documentation to reflect merged changes if needed.
+When a USB printer is attached, the library shows a dialog:
 
-## Connect with Us
+```text
+Do you want to connect printer_name?
+```
 
-If you're enthusiastic about revolutionizing Android printing and wish to contribute, connect with us! Drop a message indicating your interest or any queries you might have.
+After the user taps OK, Android grants USB permission if needed, the SDK opens the printer, and the next print can be sent directly:
 
-Let's collaborate and simplify printing experiences for businesses worldwide! 🌍💡
+```kotlin
+printer.printUsbBitmap(bitmap)
+```
 
-For inquiries, reach out to gauravs7741@gmail.com.
+You can also show the same dialog for the currently attached USB printer:
 
-Thank you for considering contributing to Generic-Printer! 🚀🖨️
+```kotlin
+printer.connectUsbPrinter()
+```
+
+## Low-Level API
+
+Use `PrinterClient` directly when you want to build your own UI.
+
+```kotlin
+val printer = PrinterFactory.bluetooth(
+    config = PrinterConfig(
+        bluetoothMacAddress = "00:11:22:33:44:55",
+        paperWidthPx = 384,
+        debug = true
+    )
+)
+
+if (printer.connect()) {
+    printer.printText("GenericPrinter SDK")
+    printer.feed(2)
+    printer.cut()
+    printer.disconnect()
+}
+```
+
+For USB:
+
+```kotlin
+val usbManager = context.getSystemService(Context.USB_SERVICE) as UsbManager
+val printer = PrinterFactory.usb(usbManager)
+
+if (printer.connect()) {
+    printer.printText("USB receipt")
+    printer.feed()
+    printer.disconnect()
+}
+```
+
+## Optimized Receipt Printing
+
+`printReceipt` batches the receipt into one byte array before sending it to the printer. This is faster and more reliable than many small writes, especially over Bluetooth.
+
+```kotlin
+printer.connectedClient()?.printReceipt {
+    reset()
+    align(PrinterAlignment.CENTER)
+    text("My Store")
+    text("Tax Invoice")
+    align(PrinterAlignment.LEFT)
+    text("Item A       100.00")
+    text("Item B        50.00")
+    feed(2)
+    cut()
+}
+```
+
+## Images
+
+```kotlin
+import com.atomx.genericprinter.utils.PrinterImageLoader
+
+val bitmap = PrinterImageLoader.fromDrawable(context, R.drawable.receipt_logo)
+
+printer.connectedClient()?.printBitmap(bitmap, center = true)
+```
+
+Default paper width is `384px`, which is common for 58mm thermal printers. Use `PrinterConfig(paperWidthPx = 576)` for many 80mm printers.
+
+## Local Development
+
+Build and test the SDK:
+
+```bash
+./gradlew :genericprinter:assembleRelease :genericprinter:testReleaseUnitTest
+```
+
+Publish to your local Maven repository:
+
+```bash
+./gradlew publishToMavenLocal
+```
+
+## Releasing With JitPack
+
+1. Update `VERSION_NAME` in `gradle.properties`.
+2. Commit the change.
+3. Create and push a Git tag that matches the version, for example `1.1.2`.
+4. Open `https://jitpack.io/#KundalikSuryawanshi/Generic-Printer`.
+5. Ask consumers to use the same version in Gradle.
+
+## License
+
+MIT. See [LICENSE](LICENSE).

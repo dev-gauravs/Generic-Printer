@@ -5,8 +5,8 @@ plugins {
 }
 
 allprojects {
-    group = "com.github.KundalikSuryawanshi"
-    version = "1.0.7"
+    group = findProperty("GROUP") ?: "com.github.KundalikSuryawanshi"
+    version = findProperty("VERSION_NAME") ?: "1.0.7"
 }
 
 tasks.register("publishToMavenLocal") {

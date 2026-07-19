@@ -1,16 +1,14 @@
+package com.atomx.genericprinter
+
 import android.graphics.Bitmap
-import com.atomx.genericprinter.EscPosCommands
-import com.atomx.genericprinter.EscPosImage
-import com.atomx.genericprinter.PrinterConfig
-import com.atomx.genericprinter.PrinterConnection
-import com.atomx.genericprinter.PrinterLogger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.Closeable
 
 class PrinterClient(
     private val connection: PrinterConnection,
     private val config: PrinterConfig = PrinterConfig()
-) {
+) : Closeable {
 
     init {
         PrinterLogger.enabled = config.debug
@@ -20,7 +18,7 @@ class PrinterClient(
         connect()
     }
 
-    suspend fun printAsync(block: PrinterClient.() -> Unit) =
+    suspend fun printAsync(block: suspend PrinterClient.() -> Unit) =
         withContext(Dispatchers.IO) {
             ensureConnected()
             block()
@@ -31,9 +29,15 @@ class PrinterClient(
         return connection.connect()
     }
 
+    fun isConnected(): Boolean = connection.isConnected()
+
     fun disconnect() {
         PrinterLogger.d("disconnect() called")
         connection.close()
+    }
+
+    override fun close() {
+        disconnect()
     }
 
     fun printText(text: String, newLine: Boolean = true) {
@@ -47,9 +51,32 @@ class PrinterClient(
         connection.write(
             if (center) EscPosCommands.ALIGN_CENTER else EscPosCommands.ALIGN_LEFT
         )
-        val bytes = EscPosImage.toRasterBytes(bitmap, config.paperWidthPx)
+        val bytes = EscPosImage.toRasterBytes(
+            bitmap = bitmap,
+            targetWidthPx = config.paperWidthPx,
+            threshold = config.imageThreshold
+        )
         connection.write(bytes)
         connection.write(EscPosCommands.LF)
+    }
+
+    fun printReceipt(block: ReceiptBuilder.() -> Unit) {
+        ensureConnected()
+        connection.write(buildReceipt(block))
+    }
+
+    fun buildReceipt(block: ReceiptBuilder.() -> Unit): ByteArray {
+        return ReceiptBuilder(config).apply(block).build()
+    }
+
+    fun writeRaw(bytes: ByteArray) {
+        ensureConnected()
+        connection.write(bytes)
+    }
+
+    fun setAlignment(alignment: PrinterAlignment) {
+        ensureConnected()
+        connection.write(alignment.command)
     }
 
     fun feed(lines: Int = 3) {

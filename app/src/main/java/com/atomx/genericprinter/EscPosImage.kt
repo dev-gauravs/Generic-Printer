@@ -9,12 +9,15 @@ object EscPosImage {
      * Converts bitmap to ESC/POS raster command: GS v 0
      * mode 0 = normal
      */
-    fun toRasterBytes(bitmap: Bitmap, targetWidthPx: Int): ByteArray {
+    fun toRasterBytes(
+        bitmap: Bitmap,
+        targetWidthPx: Int,
+        threshold: Int = 160
+    ): ByteArray {
         val resized = resizeToWidth(bitmap, targetWidthPx)
-        val mono = toMonochrome(resized)
 
-        val width = mono.width
-        val height = mono.height
+        val width = resized.width
+        val height = resized.height
         val bytesPerRow = (width + 7) / 8
 
         val header = ByteArray(8)
@@ -28,21 +31,23 @@ object EscPosImage {
         header[7] = ((height shr 8) and 0xFF).toByte()      // yH
 
         val imageData = ByteArray(bytesPerRow * height)
-        var idx = 0
+        val pixels = IntArray(width * height)
+        resized.getPixels(pixels, 0, width, 0, 0, width, height)
 
         for (y in 0 until height) {
+            val rowOffset = y * width
+            val dataOffset = y * bytesPerRow
             for (xByte in 0 until bytesPerRow) {
                 var b = 0
                 for (bit in 0 until 8) {
                     val x = xByte * 8 + bit
                     if (x < width) {
-                        val pixel = mono.getPixel(x, y)
-                        // mono pixel is either black (0xFF000000) or white (0xFFFFFFFF)
-                        val isBlack = (pixel and 0x00FFFFFF) == 0x000000
+                        val pixel = pixels[rowOffset + x]
+                        val isBlack = isBlack(pixel, threshold)
                         if (isBlack) b = b or (1 shl (7 - bit))
                     }
                 }
-                imageData[idx++] = b.toByte()
+                imageData[dataOffset + xByte] = b.toByte()
             }
         }
 
@@ -59,23 +64,14 @@ object EscPosImage {
         return Bitmap.createScaledBitmap(bitmap, widthPx, newH, true)
     }
 
-    private fun toMonochrome(bitmap: Bitmap): Bitmap {
-        val width = bitmap.width
-        val height = bitmap.height
-        val out = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+    private fun isBlack(pixel: Int, threshold: Int): Boolean {
+        val alpha = (pixel ushr 24) and 0xFF
+        if (alpha < 16) return false
 
-        for (y in 0 until height) {
-            for (x in 0 until width) {
-                val p = bitmap.getPixel(x, y)
-                val r = (p shr 16) and 0xFF
-                val g = (p shr 8) and 0xFF
-                val b = p and 0xFF
-                val gray = (r + g + b) / 3
-                // threshold; tweak if needed
-                val newPixel = if (gray < 160) 0xFF000000.toInt() else 0xFFFFFFFF.toInt()
-                out.setPixel(x, y, newPixel)
-            }
-        }
-        return out
+        val r = (pixel ushr 16) and 0xFF
+        val g = (pixel ushr 8) and 0xFF
+        val b = pixel and 0xFF
+        val gray = ((r * 299) + (g * 587) + (b * 114)) / 1000
+        return gray < threshold
     }
 }
